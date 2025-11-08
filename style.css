@@ -1,1 +1,11 @@
-body{margin:0;font-family:system-ui;background:#0f0b1a;color:#fff}#wrap{display:flex;gap:14px;padding:14px}.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px}.left{flex:1.6;display:flex;flex-direction:column;gap:10px}.right{flex:1;display:flex;flex-direction:column;gap:10px}.row{display:flex;gap:8px;flex-wrap:wrap}input,button,select{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff}button.primary{background:#ffd23f;color:#1a0a00;font-weight:800;border:none}#scores .line{display:flex;justify-content:space-between;border:1px solid rgba(255,255,255,.15);padding:8px;border-radius:8px;margin-top:6px}pre{white-space:pre-wrap;margin:0;max-height:240px;overflow:auto}
+body{background:#0e0b1a;color:#fff;font-family:system-ui;margin:0}
+#wrap{display:flex;gap:16px;padding:16px}
+.left{flex:1}
+.right{width:420px}
+.card{background:#1a1430;border:1px solid #312353;border-radius:12px;padding:12px;margin-bottom:16px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,button,select{padding:10px;border-radius:10px;border:none;font-size:16px}
+button.primary{background:#ffd23f;color:#222;font-weight:700;cursor:pointer}
+.timer{margin-left:auto;font-weight:700}
+#scores{white-space:pre-line}
+#log{white-space:pre-wrap;max-height:240px;overflow:auto}
