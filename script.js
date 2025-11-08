@@ -1,130 +1,138 @@
-// Utility function
+// ===== Utils =====
 const $ = id => document.getElementById(id);
 
-// ✅ URL FIXE — AUTOMATIQUE
-const FIXED_SERVER_URL = "wss://quizcine-server-1.onrender.com";
+// ✅ URL Socket.IO du serveur (Render)
+const IO_URL = "https://quizcine-server-1.onrender.com";
 
 let socket = null;
+let room = "CINE"; // mets ton code par défaut si tu veux
 
-// ----------------------------
-// ✅ Generate QR Code
-// ----------------------------
+// ----- QR Code vers le PLAYER -----
 function generateQrCode(url) {
-    $('qrBox').innerHTML = '<div id="qrContainer"></div>';
-    new QRCode("qrContainer", {
-        text: url,
-        width: 256,
-        height: 256,
-        colorDark: "#ffffff",
-        colorLight: "#000000",
-        correctLevel: QRCode.CorrectLevel.H
+  $('qrBox').innerHTML = '<div id="qrContainer"></div>';
+  new QRCode("qrContainer", {
+    text: url,
+    width: 256,
+    height: 256,
+    colorDark: "#ffffff",
+    colorLight: "#000000",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+function log(msg) {
+  const el = $('log'); if (!el) return;
+  el.textContent += msg + "\n";
+  el.scrollTop = el.scrollHeight;
+}
+
+function renderScores(scores){
+  const box = $('scores'); if(!box) return;
+  box.innerHTML = "";
+  Object.values(scores)
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,10)
+    .forEach((p,i)=>{
+      const d = document.createElement('div');
+      d.className = 'line';
+      d.innerHTML = `<div>${i+1}. <b>${p.name}</b></div><div>${p.score} pts</div>`;
+      box.appendChild(d);
     });
 }
 
-// ----------------------------
-// ✅ Show Connected Users
-// ----------------------------
-function showConnectedViewers(count) {
-    $('connectedViewers').textContent = count;
-}
+// ===== Connexion Socket.IO =====
+function connectIO(){
+  // IMPORTANT: Socket.IO client, pas WebSocket natif
+  socket = io(IO_URL, {
+    transports: ["websocket"],   // évite long-polling
+    path: "/socket.io"           // path par défaut côté server
+  });
 
-// ----------------------------
-// ✅ AUTO-CONNECT to WebSocket
-// ----------------------------
-function initWebSocket() {
+  $('status').textContent = "Connexion...";
+  $('status').style.color = "#ffaa00";
 
-    const serverUrl = FIXED_SERVER_URL; // ✅ URL FIXE
+  socket.on("connect", () => {
+    $('status').textContent = "✅ Connecté";
+    $('status').style.color = "#00ff00";
+    log("Connecté à Socket.IO");
+    // Le host se joint aussi à la salle pour recevoir infos
+    socket.emit("host-join", { room });
+  });
 
-    $('status').textContent = "Connexion...";
+  socket.on("disconnect", () => {
+    $('status').textContent = "🔌 Déconnecté (reconnexion auto)";
     $('status').style.color = "#ffaa00";
+    log("Déconnecté");
+  });
 
-    socket = new WebSocket(serverUrl);
-
-    socket.onopen = () => {
-        console.log("✅ Connecté au serveur WebSocket");
-        $('status').textContent = "✅ Connecté";
-        $('status').style.color = "#00ff00";
-
-        socket.send(JSON.stringify({ type: "host_ready" }));
-    };
-
-    socket.onerror = () => {
-        $('status').textContent = "❌ Erreur WebSocket";
-        $('status').style.color = "#ff5555";
-    };
-
-    socket.onclose = () => {
-        $('status').textContent = "🔌 Déconnecté (retry dans 3s)";
-        $('status').style.color = "#ffaa00";
-        setTimeout(initWebSocket, 3000); // ✅ Reconnexion automatique
-    };
-
-    socket.onmessage = event => {
-        const data = JSON.parse(event.data);
-
-        if (data.type === "viewer_count") {
-            showConnectedViewers(data.count);
-        }
-
-        if (data.type === "qr_url") {
-            generateQrCode(data.url);
-        }
-
-        if (data.type === "message") {
-            console.log("Message serveur:", data.message);
-        }
-    };
+  // Événements du serveur (conformes à ton index.js)
+  socket.on("room-info", (info)=> {
+    renderScores(info?.scores || {});
+  });
+  socket.on("player-joined", (p)=> log(`👤 ${p.name} a rejoint`));
+  socket.on("answer-received", (p)=> log(`✍️ ${p.name} → ${p.answer}`));
+  socket.on("scores", (s)=> renderScores(s));
+  socket.on("server-round-loaded", (d)=> log(`📂 Manche chargée (${d.count} questions)`));
 }
 
-// ----------------------------
-// ✅ Send Action to Server
-// ----------------------------
-function sendAction(action) {
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
-        alert("❌ Serveur non connecté !");
-        return;
-    }
-
-    socket.send(JSON.stringify({
-        type: "action",
-        action
-    }));
+// ===== Actions Host =====
+function loadRound(){
+  const rn = ($('roundName')?.value || "").trim();
+  if(!rn){ alert("Nom de manche requis"); return; }
+  room = ($('room')?.value || "CINE").trim().toUpperCase();
+  socket.emit("host-join", { room });
+  socket.emit("start-from-server", { room, round: rn });
+  log(`Demande de chargement de la manche "${rn}"`);
 }
 
-// ----------------------------
-// ✅ Upload JSON File
-// ----------------------------
-function uploadQuestions() {
-    const fileInput = $('questionsFile');
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("Veuillez sélectionner un questions.json");
-        return;
-    }
-
-    const reader = new FileReader();
-
-    reader.onload = e => {
-        try {
-            const json = JSON.parse(e.target.result);
-
-            socket.send(JSON.stringify({
-                type: "upload_questions",
-                questions: json.questions || []
-            }));
-
-            alert("✅ Questions envoyées au serveur !");
-        } catch (err) {
-            alert("❌ JSON invalide");
-            console.error(err);
-        }
-    };
-
-    reader.readAsText(file);
+function nextFromServer(){
+  socket.emit("next-from-server", { room });
+  log("➡️ Question suivante (serveur)");
 }
 
-// ----------------------------
-// ✅ AUTO-START
-// ----------------------------
-window.addEventListener("load", initWebSocket);
+function revealNow(){
+  socket.emit("reveal", { room });
+  log("🎬 Révéler & compter");
+}
+
+function startManual(){
+  const type = $('qType').value;
+  const q = {
+    room,
+    type,
+    text: $('qText').value.trim(),
+    image: $('qImg').value.trim(),
+    choices: type==='mcq' ? [
+      $('cA').value, $('cB').value, $('cC').value, $('cD').value
+    ] : [],
+    answer: $('qAns').value.trim(),
+    points: parseInt($('qPts').value||'10',10),
+    duration: parseInt($('qDur').value||'30',10),
+    allowChange: true
+  };
+  if(!q.text || !q.answer){ alert("Texte + bonne réponse requis"); return; }
+  socket.emit("start-question", q);
+  log("▶️ Question manuelle envoyée");
+}
+
+// ===== QR vers le Player =====
+function makePlayerQR(){
+  const playerBase = $('playerUrl')?.value?.trim() || "";
+  if(!playerBase){ alert("URL du Player requise"); return; }
+  const rn = ($('room')?.value || "CINE").trim().toUpperCase();
+  const url = `${playerBase}?code=${encodeURIComponent(rn)}`;
+  generateQrCode(url);
+  log(`🔗 QR vers ${url}`);
+}
+
+// ===== Bind UI =====
+window.addEventListener("load", ()=>{
+  // Connexion auto
+  connectIO();
+
+  $('loadRound')?.addEventListener('click', loadRound);
+  $('nextServer')?.addEventListener('click', nextFromServer);
+  $('reveal')?.addEventListener('click', revealNow);
+  $('start')?.addEventListener('click', startManual);
+  $('qrBtn')?.addEventListener('click', makePlayerQR);
+});
