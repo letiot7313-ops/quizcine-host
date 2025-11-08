@@ -1,17 +1,16 @@
-// Utility function to simplify document.getElementById
+// Utility function
 const $ = id => document.getElementById(id);
 
-// Function to show the Connected Viewers and QR Code
-function showConnectedViewers(viewersCount) {
-    $('connectedViewers').textContent = viewersCount;
-}
+// ✅ URL FIXE — AUTOMATIQUE
+const FIXED_SERVER_URL = "wss://quizcine-server-1.onrender.com";
 
-// Function to generate QR Code
+let socket = null;
+
+// ----------------------------
+// ✅ Generate QR Code
+// ----------------------------
 function generateQrCode(url) {
-    // Clear QR container
     $('qrBox').innerHTML = '<div id="qrContainer"></div>';
-
-    // Generate QR code using the QRCode.js library
     new QRCode("qrContainer", {
         text: url,
         width: 256,
@@ -22,31 +21,42 @@ function generateQrCode(url) {
     });
 }
 
-// Initialize WebSocket connection to server
-let socket = null;
+// ----------------------------
+// ✅ Show Connected Users
+// ----------------------------
+function showConnectedViewers(count) {
+    $('connectedViewers').textContent = count;
+}
 
+// ----------------------------
+// ✅ AUTO-CONNECT to WebSocket
+// ----------------------------
 function initWebSocket() {
-    const serverUrl = $('serverUrl').value.trim();
 
-    if (!serverUrl) {
-        alert("Veuillez entrer l’URL du serveur !");
-        return;
-    }
+    const serverUrl = FIXED_SERVER_URL; // ✅ URL FIXE
 
-    // Close any existing connection
-    if (socket) {
-        socket.close();
-    }
+    $('status').textContent = "Connexion...";
+    $('status').style.color = "#ffaa00";
 
     socket = new WebSocket(serverUrl);
 
     socket.onopen = () => {
-        console.log("✅ Connecté au serveur");
-        $('status').textContent = "✅ Connecté au serveur";
+        console.log("✅ Connecté au serveur WebSocket");
+        $('status').textContent = "✅ Connecté";
         $('status').style.color = "#00ff00";
 
-        // Send host ready signal
         socket.send(JSON.stringify({ type: "host_ready" }));
+    };
+
+    socket.onerror = () => {
+        $('status').textContent = "❌ Erreur WebSocket";
+        $('status').style.color = "#ff5555";
+    };
+
+    socket.onclose = () => {
+        $('status').textContent = "🔌 Déconnecté (retry dans 3s)";
+        $('status').style.color = "#ffaa00";
+        setTimeout(initWebSocket, 3000); // ✅ Reconnexion automatique
     };
 
     socket.onmessage = event => {
@@ -61,44 +71,41 @@ function initWebSocket() {
         }
 
         if (data.type === "message") {
-            console.log("Message:", data.message);
+            console.log("Message serveur:", data.message);
         }
-    };
-
-    socket.onerror = () => {
-        $('status').textContent = "❌ Erreur de connexion";
-        $('status').style.color = "#ff5555";
-    };
-
-    socket.onclose = () => {
-        $('status').textContent = "🔌 Déconnecté";
-        $('status').style.color = "#ffaa00";
     };
 }
 
-// Send action (next question, show leaderboard, etc.)
+// ----------------------------
+// ✅ Send Action to Server
+// ----------------------------
 function sendAction(action) {
     if (!socket || socket.readyState !== WebSocket.OPEN) {
-        alert("Vous n’êtes pas connecté au serveur !");
+        alert("❌ Serveur non connecté !");
         return;
     }
 
-    socket.send(JSON.stringify({ type: "action", action }));
+    socket.send(JSON.stringify({
+        type: "action",
+        action
+    }));
 }
 
-// Load JSON questions into server
+// ----------------------------
+// ✅ Upload JSON File
+// ----------------------------
 function uploadQuestions() {
     const fileInput = $('questionsFile');
     const file = fileInput.files[0];
 
     if (!file) {
-        alert("Veuillez sélectionner un fichier questions.json !");
+        alert("Veuillez sélectionner un questions.json");
         return;
     }
 
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.onload = e => {
         try {
             const json = JSON.parse(e.target.result);
 
@@ -109,10 +116,15 @@ function uploadQuestions() {
 
             alert("✅ Questions envoyées au serveur !");
         } catch (err) {
-            alert("❌ Erreur dans le fichier JSON");
+            alert("❌ JSON invalide");
             console.error(err);
         }
     };
 
     reader.readAsText(file);
 }
+
+// ----------------------------
+// ✅ AUTO-START
+// ----------------------------
+window.addEventListener("load", initWebSocket);
