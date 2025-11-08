@@ -4,8 +4,6 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>🎬 Quiz Ciné — Host</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -14,76 +12,51 @@
     <h1>🎬 Quiz Ciné — Tableau Animateur</h1>
     <div class="row">
       <label>Serveur WebSocket</label>
-      <input id="ws" placeholder="wss://quizcine-server-1.onrender.com" value="wss://quizcine-server-1.onrender.com" style="min-width:360px">
+      <input id="ws" placeholder="wss://quizcine-server.onrender.com" value="ws://localhost:10000">
       <label>Code salle</label>
-      <input id="room" value="CINE" style="width:120px;text-transform:uppercase">
+      <input id="room" value="CINE" style="text-transform:uppercase">
       <button id="connect" class="primary">Se connecter</button>
       <div class="timer">⏱️ <span id="time">—</span></div>
     </div>
-    <div class="row" style="margin-top:8px">
+    <div class="row">
       <label>URL Player</label>
-      <input id="playerUrl" placeholder="https://quizcine-player.onrender.com" style="min-width:420px">
+      <input id="playerUrl" placeholder="https://quizcine-player.onrender.com">
       <button id="qrBtn">QR</button>
-      <span class="badge">Max joueurs : 200</span>
-      <span class="badge">Réponse modifiable</span>
     </div>
   </div>
 
   <div class="left card">
-    <h1>📝 Nouvelle question</h1>
+    <h1>🗂️ Manches du serveur</h1>
     <div class="row">
-      <label>Type</label>
-      <select id="qType">
-        <option value="mcq">QCM (A–D)</option>
-        <option value="open">Ouverte (texte)</option>
-      </select>
-      <label>Points</label>
-      <input id="qPts" type="number" value="10" style="width:120px">
-      <label>Durée (sec)</label>
-      <input id="qDur" type="number" value="30" style="width:120px">
-    </div>
-    <label>Texte</label>
-    <input id="qText" style="width:100%" placeholder="Ex: Titre VF de… ?">
-    <label>Image (URL) — Google Drive direct (uc?id=...)</label>
-    <input id="qImg" style="width:100%" placeholder="https://drive.google.com/uc?id=...">
-    <img id="preview" class="qimg">
-    <div id="mcqBox">
-      <label>Propositions (A–D)</label>
-      <div class="row">
-        <input id="cA" style="flex:1" placeholder="Réponse A">
-        <input id="cB" style="flex:1" placeholder="Réponse B">
-      </div>
-      <div class="row" style="margin-top:6px">
-        <input id="cC" style="flex:1" placeholder="Réponse C">
-        <input id="cD" style="flex:1" placeholder="Réponse D">
-      </div>
-    </div>
-    <label>Bonne réponse (texte exact)</label>
-    <input id="qAns" style="width:100%" placeholder="Ex: Dirty Dancing">
-    <div class="row" style="margin-top:10px">
-      <button id="start" class="primary">Démarrer</button>
+      <input id="roundName" placeholder='Ex: Tu aimes regarder en x2 ?'>
+      <button id="loadRound" class="primary">Charger</button>
+      <button id="nextServer">Question suivante (serveur)</button>
       <button id="reveal">Révéler & Compter</button>
-      <button id="next">Question suivante</button>
-      <span class="small">Astuce: <kbd>Entrée</kbd> passe au champ suivant</span>
+    </div>
+    <h1 style="margin-top:10px">📝 Question manuelle</h1>
+    <div class="row">
+      <select id="qType"><option value="mcq">QCM</option><option value="open">Ouverte</option></select>
+      <input id="qPts" type="number" value="10" style="width:100px">
+      <input id="qDur" type="number" value="30" style="width:100px">
+    </div>
+    <input id="qText" placeholder="Texte">
+    <input id="qImg" placeholder="Image (Drive uc?id=...)">
+    <input id="qVid" placeholder="Vidéo (videos/xxx.mp4)">
+    <div class="row"><input id="cA" placeholder="A"><input id="cB" placeholder="B"></div>
+    <div class="row"><input id="cC" placeholder="C"><input id="cD" placeholder="D"></div>
+    <input id="qAns" placeholder="Bonne réponse">
+    <div class="row">
+      <button id="start" class="primary">Démarrer (manuel)</button>
     </div>
   </div>
 
   <div class="right">
     <div class="card">
       <h1>📱 QR — Rejoindre</h1>
-      <div id="qrBox" style="display:flex;justify-content:center;align-items:center;">
-        <canvas id="qrCanvas" width="256" height="256" style="border:4px solid #fff;border-radius:12px;"></canvas>
-      </div>
-      <div class="small" style="margin-top:6px">Les joueurs scannent ce QR pour rejoindre (code auto prérempli).</div>
+      <div id="qrBox"><canvas id="qrCanvas" width="256" height="256"></canvas></div>
     </div>
-    <div class="card">
-      <h1>🏆 Scores (Top 10)</h1>
-      <div id="scores"></div>
-    </div>
-    <div class="card">
-      <h1>📡 Journal</h1>
-      <pre id="log" class="small" style="white-space:pre-wrap;max-height:240px;overflow:auto;margin:0"></pre>
-    </div>
+    <div class="card"><h1>🏆 Scores</h1><div id="scores"></div></div>
+    <div class="card"><h1>📡 Journal</h1><pre id="log"></pre></div>
   </div>
 </div>
 
