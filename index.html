@@ -1,30 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>🎬 Quiz Ciné — Host</title>
-<link rel="stylesheet" href="./style.css">
-</head>
+<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>🎬 Quiz Ciné — Host</title><link rel="stylesheet" href="./style.css"></head>
 <body>
 <div id="wrap">
   <div class="left card">
     <h1>🎬 Quiz Ciné — Tableau Animateur</h1>
     <div class="row">
       <label>Serveur WebSocket</label>
-      <input id="ws" placeholder="wss://quizcine-server.onrender.com" value="ws://localhost:10000">
-      <label>Code salle</label>
+      <input id="ws" value="ws://localhost:10000">
+      <label>Code</label>
       <input id="room" value="CINE" style="text-transform:uppercase">
       <button id="connect" class="primary">Se connecter</button>
-      <div class="timer">⏱️ <span id="time">—</span></div>
-    </div>
-    <div class="row">
-      <label>URL Player</label>
-      <input id="playerUrl" placeholder="https://quizcine-player.onrender.com">
-      <button id="qrBtn">QR</button>
     </div>
   </div>
-
   <div class="left card">
     <h1>🗂️ Manches du serveur</h1>
     <div class="row">
@@ -41,7 +30,6 @@
     </div>
     <input id="qText" placeholder="Texte">
     <input id="qImg" placeholder="Image (Drive uc?id=...)">
-    <input id="qVid" placeholder="Vidéo (videos/xxx.mp4)">
     <div class="row"><input id="cA" placeholder="A"><input id="cB" placeholder="B"></div>
     <div class="row"><input id="cC" placeholder="C"><input id="cD" placeholder="D"></div>
     <input id="qAns" placeholder="Bonne réponse">
@@ -49,19 +37,11 @@
       <button id="start" class="primary">Démarrer (manuel)</button>
     </div>
   </div>
-
   <div class="right">
-    <div class="card">
-      <h1>📱 QR — Rejoindre</h1>
-      <div id="qrBox"><canvas id="qrCanvas" width="256" height="256"></canvas></div>
-    </div>
     <div class="card"><h1>🏆 Scores</h1><div id="scores"></div></div>
     <div class="card"><h1>📡 Journal</h1><pre id="log"></pre></div>
   </div>
 </div>
-
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script src="./script.js"></script>
-</body>
-</html>
+</body></html>

@@ -1,11 +1,1 @@
-body{margin:0;font-family:system-ui;background:#0f0b1a;color:#fff}
-#wrap{display:flex;gap:14px;padding:14px}
-.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px}
-.left{flex:1.6;display:flex;flex-direction:column;gap:10px}
-.right{flex:1;display:flex;flex-direction:column;gap:10px}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-input,button,select{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff}
-button.primary{background:#ffd23f;color:#1a0a00;font-weight:800;border:none}
-#qrBox{display:flex;justify-content:center;align-items:center;height:280px;background:rgba(255,255,255,.05);border-radius:12px}
-#scores .line{display:flex;justify-content:space-between;border:1px solid rgba(255,255,255,.15);padding:8px;border-radius:8px;margin-top:6px}
-pre{white-space:pre-wrap;margin:0;max-height:240px;overflow:auto}
+body{margin:0;font-family:system-ui;background:#0f0b1a;color:#fff}#wrap{display:flex;gap:14px;padding:14px}.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px}.left{flex:1.6;display:flex;flex-direction:column;gap:10px}.right{flex:1;display:flex;flex-direction:column;gap:10px}.row{display:flex;gap:8px;flex-wrap:wrap}input,button,select{padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff}button.primary{background:#ffd23f;color:#1a0a00;font-weight:800;border:none}#scores .line{display:flex;justify-content:space-between;border:1px solid rgba(255,255,255,.15);padding:8px;border-radius:8px;margin-top:6px}pre{white-space:pre-wrap;margin:0;max-height:240px;overflow:auto}
