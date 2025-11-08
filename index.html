@@ -69,11 +69,17 @@
   </div>
 
   <div class="right">
-    <div class="card">
-      <h1>📱 QR — Rejoindre</h1>
-      <div id="qrBox">QR</div>
-      <div class="small" style="margin-top:6px">Les joueurs scannent ce QR pour rejoindre (code auto prérempli).</div>
-    </div>
+   <div class="card">
+  <h1>📱 QR — Rejoindre</h1>
+
+  <div id="qrBox" style="display:flex;justify-content:center;align-items:center;">
+    <canvas id="qrCanvas" width="256" height="256" style="border:4px solid #fff;border-radius:12px;"></canvas>
+  </div>
+
+  <div class="small" style="margin-top:6px">
+    Les joueurs scannent ce QR pour rejoindre (code auto prérempli).
+  </div>
+</div>
     <div class="card">
       <h1>🏆 Scores (Top 10)</h1>
       <div id="scores"></div>
