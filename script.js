@@ -1,10 +1,17 @@
 const $=id=>document.getElementById(id);
 let socket=null, room=null, timerInt=null;
-let bonus = { quick: 5, streakEvery: 3, streakBonus: 5, enableQuick:true, enableStreak:true };
+
 function log(m){ const el=$('log'); el.textContent += m+"\n"; el.scrollTop=el.scrollHeight; }
 function setPreview(){ const u=$('qImg').value.trim(); const img=$('preview'); if(u){ img.src=u; img.style.display='block'; } else { img.style.display='none'; } }
-$('qImg').addEventListener('input', setPreview);
-$('qType').addEventListener('change', ()=>{ document.getElementById('mcqBox').style.display = ($('qType').value==='mcq'?'block':'none'); });
+document.addEventListener('DOMContentLoaded', ()=>{
+  $('qImg').addEventListener('input', setPreview);
+  $('qType').addEventListener('change', ()=>{ document.getElementById('mcqBox').style.display = ($('qType').value==='mcq'?'block':'none'); });
+  $('connect').onclick = connect;
+  $('start').onclick = start;
+  $('reveal').onclick = reveal;
+  $('next').onclick = nextQ;
+  $('qrBtn').onclick = generateQR;
+});
 
 function connect(){
   const url=$('ws').value.trim();
@@ -19,7 +26,6 @@ function connect(){
   socket.on('scores', s=> renderScores(s));
   socket.emit('host-join', {room});
 }
-$('connect').onclick = connect;
 
 function start(){
   const type = $('qType').value;
@@ -39,14 +45,12 @@ function start(){
   startTimer(q.duration);
   log('▶️ Question envoyée ('+q.type+')');
 }
-$('start').onclick=start;
 
 function reveal(){
   socket.emit('reveal', {room});
   stopTimer();
   log('🎬 Révélé + scores envoyés');
 }
-$('reveal').onclick=reveal;
 
 function nextQ(){
   ['qText','qImg','cA','cB','cC','cD','qAns'].forEach(id=> $(id).value='');
@@ -54,7 +58,6 @@ function nextQ(){
   $('qPts').value='10'; $('qDur').value='30';
   $('time').textContent='—';
 }
-$('next').onclick=nextQ;
 
 function startTimer(s){
   stopTimer();
@@ -77,11 +80,11 @@ function renderScores(scores){
   });
 }
 
-$('qrBtn').onclick = async()=>{
+async function generateQR(){
   const base=$('playerUrl').value.trim().replace(/\/+$/,'');
   if(!base){ alert('URL Player requise'); return; }
   const url = base + '/?code='+ encodeURIComponent(($('room').value||'').trim().toUpperCase());
-  const canvas = document.createElement('canvas');
-  await QRCode.toCanvas(canvas, url, {width: 220, color:{dark:'#000', light:'#fff'}});
-  const box=$('qrBox'); box.innerHTML=''; box.appendChild(canvas);
-};
+  const canvas = document.getElementById('qrCanvas');
+  await QRCode.toCanvas(canvas, url, {width: 256, color:{dark:'#000', light:'#fff'}});
+  log('🔗 QR généré pour '+url);
+}

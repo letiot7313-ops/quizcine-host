@@ -3,9 +3,6 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <title>🎬 Quiz Ciné — Host</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
@@ -25,7 +22,7 @@
     </div>
     <div class="row" style="margin-top:8px">
       <label>URL Player</label>
-      <input id="playerUrl" placeholder="https://ton-player.example.com" style="min-width:420px">
+      <input id="playerUrl" placeholder="https://quizcine-player.onrender.com" style="min-width:420px">
       <button id="qrBtn">QR</button>
       <span class="badge">Max joueurs : 200</span>
       <span class="badge">Réponse modifiable</span>
@@ -72,17 +69,13 @@
   </div>
 
   <div class="right">
-   <div class="card">
-  <h1>📱 QR — Rejoindre</h1>
-
-  <div id="qrBox" style="display:flex;justify-content:center;align-items:center;">
-    <canvas id="qrCanvas" width="256" height="256" style="border:4px solid #fff;border-radius:12px;"></canvas>
-  </div>
-
-  <div class="small" style="margin-top:6px">
-    Les joueurs scannent ce QR pour rejoindre (code auto prérempli).
-  </div>
-</div>
+    <div class="card">
+      <h1>📱 QR — Rejoindre</h1>
+      <div id="qrBox" style="display:flex;justify-content:center;align-items:center;">
+        <canvas id="qrCanvas" width="256" height="256" style="border:4px solid #fff;border-radius:12px;"></canvas>
+      </div>
+      <div class="small" style="margin-top:6px">Les joueurs scannent ce QR pour rejoindre (code auto prérempli).</div>
+    </div>
     <div class="card">
       <h1>🏆 Scores (Top 10)</h1>
       <div id="scores"></div>
