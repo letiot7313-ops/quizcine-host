@@ -1,52 +1,96 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>🎬 Quiz Ciné — Host</title><link rel="stylesheet" href="./style.css"></head>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>🎬 Quiz Ciné — Host</title>
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:#0f0b1a;color:#fff}
+    #wrap{display:flex;gap:14px;padding:14px}
+    .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px}
+    .left{flex:1.6;display:flex;flex-direction:column;gap:12px}
+    .right{flex:1;display:flex;flex-direction:column;gap:12px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    input,button,select{padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.07);color:#fff}
+    button.primary{background:#ffd23f;color:#18122b;border:none;font-weight:700}
+    h1{margin:0 0 8px 0;font-size:20px}
+    .badge{background:#2b1f45;border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:999px;font-size:12px}
+    .line{display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,.1)}
+    #log{white-space:pre-wrap;max-height:260px;overflow:auto;margin:0;background:rgba(0,0,0,.25);padding:10px;border-radius:8px}
+    .status{font-weight:700}
+    .qimg{max-width:100%;border-radius:10px;margin-top:6px;display:none}
+    .hint{opacity:.8;font-size:12px}
+  </style>
+</head>
 <body>
 <div id="wrap">
-  <div class="left card">
-    <h1>🎬 Quiz Ciné — Tableau Animateur</h1>
-    <div class="row">
-      <label>Serveur WebSocket</label>
-      <div style="color:#0f0;font-weight:bold">
-Serveur connecté : wss://quizcine-server-1.onrender.com
-</div>
+  <div class="left">
+    <div class="card">
+      <h1>🎬 Quiz Ciné — Tableau Animateur</h1>
+      <div class="row">
+        <span class="badge">Serveur :</span>
+        <span id="serverFixed" class="badge" style="background:#1d8a4b">wss://quizcine-server-1.onrender.com</span>
+        <span class="badge">Statut : <span id="status" class="status">Connexion…</span></span>
+        <span class="badge">Joueurs : <span id="connectedViewers">0</span></span>
+      </div>
+      <div class="row">
+        <label for="room">Code salle</label>
+        <input id="room" value="CINE" style="text-transform:uppercase;width:120px">
+        <button id="connect" class="primary">Rejoindre la salle</button>
+      </div>
+      <div class="row">
+        <label for="playerUrl">URL Player</label>
+        <input id="playerUrl" placeholder="https://quizcine-player.onrender.com" style="min-width:360px">
+        <button id="qrBtn">QR</button>
+        <span class="hint">Le QR ouvre le Player avec le code prérempli.</span>
+      </div>
+    </div>
 
-      <label>Code</label>
-      <input id="room" value="CINE" style="text-transform:uppercase">
-      <button id="connect" class="primary">Se connecter</button>
+    <div class="card">
+      <h1>🗂️ Manches (chargées depuis le serveur)</h1>
+      <div class="row">
+        <input id="roundName" placeholder="Ex: Tu aimes regarder en x2 ?" style="min-width:360px">
+        <button id="loadRound" class="primary">Charger la manche</button>
+        <button id="nextServer">Question suivante</button>
+        <button id="reveal">Révéler & compter</button>
+      </div>
+
+      <h1 style="margin-top:12px">📝 Question manuelle (optionnel)</h1>
+      <div class="row">
+        <select id="qType"><option value="mcq">QCM</option><option value="open">Ouverte</option></select>
+        <label>Points</label><input id="qPts" type="number" value="10" style="width:100px">
+        <label>Durée</label><input id="qDur" type="number" value="30" style="width:100px">
+      </div>
+      <input id="qText" placeholder="Texte de la question">
+      <input id="qImg" placeholder="Image (Drive uc?id=...)">
+      <div class="row"><input id="cA" placeholder="A"><input id="cB" placeholder="B"></div>
+      <div class="row"><input id="cC" placeholder="C"><input id="cD" placeholder="D"></div>
+      <input id="qAns" placeholder="Bonne réponse (texte exact)">
+      <div class="row">
+        <button id="start" class="primary">Démarrer (manuel)</button>
+        <span class="hint">Si une manche est chargée, utilise plutôt “Question suivante”.</span>
+      </div>
     </div>
   </div>
-  <div class="left card">
-    <h1>🗂️ Manches du serveur</h1>
-    <div class="row">
-      <input id="roundName" placeholder='Ex: Tu aimes regarder en x2 ?'>
-      <button id="loadRound" class="primary">Charger</button>
-      <button id="nextServer">Question suivante (serveur)</button>
-      <button id="reveal">Révéler & Compter</button>
-    </div>
-    <h1 style="margin-top:10px">📝 Question manuelle</h1>
-    <div class="row">
-      <select id="qType"><option value="mcq">QCM</option><option value="open">Ouverte</option></select>
-      <input id="qPts" type="number" value="10" style="width:100px">
-      <input id="qDur" type="number" value="30" style="width:100px">
-    </div>
-    <input id="qText" placeholder="Texte">
-    <input id="qImg" placeholder="Image (Drive uc?id=...)">
-    <div class="row"><input id="cA" placeholder="A"><input id="cB" placeholder="B"></div>
-    <div class="row"><input id="cC" placeholder="C"><input id="cD" placeholder="D"></div>
-    <input id="qAns" placeholder="Bonne réponse">
-    <div class="row">
-      <button id="start" class="primary">Démarrer (manuel)</button>
-    </div>
-  </div>
+
   <div class="right">
-    <div class="card"><h1>🏆 Scores</h1><div id="scores"></div></div>
+    <div class="card">
+      <h1>📱 QR — Rejoindre</h1>
+      <div id="qrBox" style="display:flex;justify-content:center;align-items:center;min-height:270px;">
+        <div class="hint">Clique “QR” après avoir saisi l’URL du Player</div>
+      </div>
+    </div>
+    <div class="card"><h1>🏆 Scores (Top 10)</h1><div id="scores"></div></div>
     <div class="card"><h1>📡 Journal</h1><pre id="log"></pre></div>
   </div>
 </div>
+
+<!-- Socket.IO + QRCode.js -->
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="./script.js"></script>
 
-</body></html>
+<!-- Script Host -->
+<script src="./script.js"></script>
+</body>
+</html>
