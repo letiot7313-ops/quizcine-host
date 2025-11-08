@@ -1,1 +1,118 @@
-const $=id=>document.getElementById(id);let socket=null, room=null;function log(m){const el=$('log');el.textContent+=m+'\n';el.scrollTop=el.scrollHeight;}function renderScores(scores){const box=$('scores');box.innerHTML='';Object.values(scores).sort((a,b)=>b.score-a.score).slice(0,10).forEach((p,i)=>{const d=document.createElement('div');d.className='line';d.innerHTML=`<div>${i+1}. <b>${p.name}</b></div><div>${p.score} pts</div>`;box.appendChild(d);});}function connect(){const url=$('ws').value.trim();room=$('room').value.trim().toUpperCase();if(!url||!room){alert('Serveur + salle');return;}socket=io(url,{transports:['websocket']});socket.on('connect',()=>log('✅ Connecté'));socket.on('disconnect',()=>log('❌ Déconnecté'));socket.on('room-info', i=>renderScores(i.scores||{}));socket.on('player-joined', p=>log('👤 '+p.name+' a rejoint'));socket.on('answer-received', p=>log('✍️ '+p.name+' → '+p.answer));socket.on('scores', s=>renderScores(s));}$('connect').onclick=connect;$('start').onclick=()=>{const type=$('qType').value;const q={room,type,text:$('qText').value.trim(),image:$('qImg').value.trim(),choices:type==='mcq'?[$('cA').value,$('cB').value,$('cC').value,$('cD').value]:[],answer:$('qAns').value.trim(),points:parseInt($('qPts').value||'10',10),duration:parseInt($('qDur').value||'30',10),allowChange:true};if(!q.text||!q.answer){alert('Texte + bonne réponse');return;}socket.emit('start-question', q);log('▶️ Question envoyée');};$('reveal').onclick=()=>{socket?.emit('reveal',{room});log('🎬 Révélé');};$('loadRound').onclick=()=>{const round=$('roundName').value.trim();if(!round){alert('Nom de manche');return;}socket.emit('host-join',{room});socket.emit('start-from-server',{room, round});log('📂 Demande manche \"'+round+'\"');};$('nextServer').onclick=()=>{socket?.emit('next-from-server',{room});log('➡️ Question suivante (serveur)');};
+// Utility function to simplify document.getElementById
+const $ = id => document.getElementById(id);
+
+// Function to show the Connected Viewers and QR Code
+function showConnectedViewers(viewersCount) {
+    $('connectedViewers').textContent = viewersCount;
+}
+
+// Function to generate QR Code
+function generateQrCode(url) {
+    // Clear QR container
+    $('qrBox').innerHTML = '<div id="qrContainer"></div>';
+
+    // Generate QR code using the QRCode.js library
+    new QRCode("qrContainer", {
+        text: url,
+        width: 256,
+        height: 256,
+        colorDark: "#ffffff",
+        colorLight: "#000000",
+        correctLevel: QRCode.CorrectLevel.H
+    });
+}
+
+// Initialize WebSocket connection to server
+let socket = null;
+
+function initWebSocket() {
+    const serverUrl = $('serverUrl').value.trim();
+
+    if (!serverUrl) {
+        alert("Veuillez entrer l’URL du serveur !");
+        return;
+    }
+
+    // Close any existing connection
+    if (socket) {
+        socket.close();
+    }
+
+    socket = new WebSocket(serverUrl);
+
+    socket.onopen = () => {
+        console.log("✅ Connecté au serveur");
+        $('status').textContent = "✅ Connecté au serveur";
+        $('status').style.color = "#00ff00";
+
+        // Send host ready signal
+        socket.send(JSON.stringify({ type: "host_ready" }));
+    };
+
+    socket.onmessage = event => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "viewer_count") {
+            showConnectedViewers(data.count);
+        }
+
+        if (data.type === "qr_url") {
+            generateQrCode(data.url);
+        }
+
+        if (data.type === "message") {
+            console.log("Message:", data.message);
+        }
+    };
+
+    socket.onerror = () => {
+        $('status').textContent = "❌ Erreur de connexion";
+        $('status').style.color = "#ff5555";
+    };
+
+    socket.onclose = () => {
+        $('status').textContent = "🔌 Déconnecté";
+        $('status').style.color = "#ffaa00";
+    };
+}
+
+// Send action (next question, show leaderboard, etc.)
+function sendAction(action) {
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        alert("Vous n’êtes pas connecté au serveur !");
+        return;
+    }
+
+    socket.send(JSON.stringify({ type: "action", action }));
+}
+
+// Load JSON questions into server
+function uploadQuestions() {
+    const fileInput = $('questionsFile');
+    const file = fileInput.files[0];
+
+    if (!file) {
+        alert("Veuillez sélectionner un fichier questions.json !");
+        return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        try {
+            const json = JSON.parse(e.target.result);
+
+            socket.send(JSON.stringify({
+                type: "upload_questions",
+                questions: json.questions || []
+            }));
+
+            alert("✅ Questions envoyées au serveur !");
+        } catch (err) {
+            alert("❌ Erreur dans le fichier JSON");
+            console.error(err);
+        }
+    };
+
+    reader.readAsText(file);
+}
