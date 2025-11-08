@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>🎬 Quiz Ciné — Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div id="wrap">
+  <div class="left card">
+    <h1>🎬 Quiz Ciné — Tableau Animateur</h1>
+    <div class="row">
+      <label>Serveur WebSocket</label>
+      <input id="ws" placeholder="wss://quizcine-server-1.onrender.com" value="wss://quizcine-server-1.onrender.com" style="min-width:360px">
+      <label>Code salle</label>
+      <input id="room" value="CINE" style="width:120px;text-transform:uppercase">
+      <button id="connect" class="primary">Se connecter</button>
+      <div class="timer">⏱️ <span id="time">—</span></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <label>URL Player</label>
+      <input id="playerUrl" placeholder="https://ton-player.example.com" style="min-width:420px">
+      <button id="qrBtn">QR</button>
+      <span class="badge">Max joueurs : 200</span>
+      <span class="badge">Réponse modifiable</span>
+    </div>
+  </div>
+
+  <div class="left card">
+    <h1>📝 Nouvelle question</h1>
+    <div class="row">
+      <label>Type</label>
+      <select id="qType">
+        <option value="mcq">QCM (A–D)</option>
+        <option value="open">Ouverte (texte)</option>
+      </select>
+      <label>Points</label>
+      <input id="qPts" type="number" value="10" style="width:120px">
+      <label>Durée (sec)</label>
+      <input id="qDur" type="number" value="30" style="width:120px">
+    </div>
+    <label>Texte</label>
+    <input id="qText" style="width:100%" placeholder="Ex: Titre VF de… ?">
+    <label>Image (URL) — Google Drive direct (uc?id=...)</label>
+    <input id="qImg" style="width:100%" placeholder="https://drive.google.com/uc?id=...">
+    <img id="preview" class="qimg">
+    <div id="mcqBox">
+      <label>Propositions (A–D)</label>
+      <div class="row">
+        <input id="cA" style="flex:1" placeholder="Réponse A">
+        <input id="cB" style="flex:1" placeholder="Réponse B">
+      </div>
+      <div class="row" style="margin-top:6px">
+        <input id="cC" style="flex:1" placeholder="Réponse C">
+        <input id="cD" style="flex:1" placeholder="Réponse D">
+      </div>
+    </div>
+    <label>Bonne réponse (texte exact)</label>
+    <input id="qAns" style="width:100%" placeholder="Ex: Dirty Dancing">
+    <div class="row" style="margin-top:10px">
+      <button id="start" class="primary">Démarrer</button>
+      <button id="reveal">Révéler & Compter</button>
+      <button id="next">Question suivante</button>
+      <span class="small">Astuce: <kbd>Entrée</kbd> passe au champ suivant</span>
+    </div>
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <h1>📱 QR — Rejoindre</h1>
+      <div id="qrBox">QR</div>
+      <div class="small" style="margin-top:6px">Les joueurs scannent ce QR pour rejoindre (code auto prérempli).</div>
+    </div>
+    <div class="card">
+      <h1>🏆 Scores (Top 10)</h1>
+      <div id="scores"></div>
+    </div>
+    <div class="card">
+      <h1>📡 Journal</h1>
+      <pre id="log" class="small" style="white-space:pre-wrap;max-height:240px;overflow:auto;margin:0"></pre>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="./script.js"></script>
+</body>
+</html>
